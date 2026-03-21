@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { GameProvider } from "@/contexts/GameContext";
+import { GameProvider, useGame } from "@/contexts/GameContext";
 import SplashScreen from "./pages/SplashScreen";
 import LoginScreen from "./pages/LoginScreen";
 import WorldMap from "./pages/WorldMap";
@@ -17,6 +17,36 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function AppRoutes() {
+  const { loading, isLoggedIn } = useGame();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="text-4xl mb-3 animate-bounce">🚂</div>
+          <p className="text-sm text-muted-foreground font-body">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<SplashScreen />} />
+      <Route path="/login" element={isLoggedIn ? <Navigate to="/world" replace /> : <LoginScreen />} />
+      <Route path="/world" element={isLoggedIn ? <WorldMap /> : <Navigate to="/login" replace />} />
+      <Route path="/train" element={isLoggedIn ? <TrainJourney /> : <Navigate to="/login" replace />} />
+      <Route path="/stations" element={isLoggedIn ? <StationsList /> : <Navigate to="/login" replace />} />
+      <Route path="/station" element={isLoggedIn ? <StationView /> : <Navigate to="/login" replace />} />
+      <Route path="/game" element={isLoggedIn ? <GameScreen /> : <Navigate to="/login" replace />} />
+      <Route path="/reward" element={isLoggedIn ? <RewardScreen /> : <Navigate to="/login" replace />} />
+      <Route path="/profile" element={isLoggedIn ? <ProfileScreen /> : <Navigate to="/login" replace />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -24,18 +54,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/login" element={<LoginScreen />} />
-            <Route path="/world" element={<WorldMap />} />
-            <Route path="/train" element={<TrainJourney />} />
-            <Route path="/stations" element={<StationsList />} />
-            <Route path="/station" element={<StationView />} />
-            <Route path="/game" element={<GameScreen />} />
-            <Route path="/reward" element={<RewardScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </GameProvider>
     </TooltipProvider>

@@ -1,8 +1,8 @@
+import { supabase } from './supabase';
 import type { StudentProfile } from '@/contexts/GameContext';
 
 export interface AuthUser extends StudentProfile {
   email: string;
-  password: string;
   biometricCredentialId?: string;
 }
 
@@ -22,32 +22,25 @@ interface RegisterResult {
   user?: AuthUser;
 }
 
-const STORAGE_KEY = 'lea_users_v1';
-const LAST_USER_KEY = 'lea_last_user_id';
 const AVATARS = ['👦', '👧', '🧒', '🙂'];
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
-
 function normalizeClassName(value: string) {
   const level = value.match(/[123]/)?.[0];
   return level ? `Class ${level}` : value.trim();
-}
-
-function randomId() {
-  return `u_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function utf8Encode(text: string) {
-  return new TextEncoder().encode(text);
 }
 
 function randomBytes(length = 32) {
   const arr = new Uint8Array(length);
   crypto.getRandomValues(arr);
   return arr;
+}
+
+function utf8Encode(text: string) {
+  return new TextEncoder().encode(text);
 }
 
 function toBase64Url(bytes: Uint8Array) {
@@ -69,94 +62,21 @@ function fromBase64Url(base64url: string) {
   return bytes;
 }
 
-export function getUsers(): AuthUser[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(users: AuthUser[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-}
-
-export function rememberUser(userId: string) {
-  localStorage.setItem(LAST_USER_KEY, userId);
-}
-
-export function getRememberedUser() {
-  const rememberedId = localStorage.getItem(LAST_USER_KEY);
-  if (!rememberedId) return null;
-  return getUsers().find((user) => user.id === rememberedId) || null;
-}
-
-export function clearRememberedUser() {
-  localStorage.removeItem(LAST_USER_KEY);
-}
-
-export function findUserByIdentifier(identifier: string) {
-  const key = normalizeEmail(identifier);
-  return getUsers().find((u) => u.email === key) || null;
-}
-
-export function registerUser(input: RegisterInput): RegisterResult {
-  const users = getUsers();
-  const email = normalizeEmail(input.email);
-  const className = normalizeClassName(input.className);
-  const division = input.division.trim().toUpperCase();
-
-  if (!input.name.trim() || !className || !division || !input.rollNo || !email || !input.password) {
-    return { ok: false, error: 'Please fill all required fields.' };
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, error: 'Enter a valid email address.' };
-  }
-  if (input.password.length < 6) {
-    return { ok: false, error: 'Password must be at least 6 characters.' };
-  }
-
-  const duplicateEmail = users.some((u) => u.email === email);
-  if (duplicateEmail) return { ok: false, error: 'This email is already registered.' };
-
-
-  const duplicateRoll = users.some(
-    (u) =>
-      u.class.toLowerCase() === className.toLowerCase() &&
-      u.division.toLowerCase() === division.toLowerCase() &&
-      u.rollNo === input.rollNo,
-  );
-  if (duplicateRoll) {
-    return { ok: false, error: 'This class/division/roll number already exists.' };
-  }
-
-  const user: AuthUser = {
-    id: randomId(),
-    name: input.name.trim(),
-    class: className,
-    division,
-    rollNo: input.rollNo,
-    avatar: input.avatar || AVATARS[users.length % AVATARS.length],
-    email,
-    password: input.password,
-  };
-
-  saveUsers([...users, user]);
-  return { ok: true, user };
-}
-
-export function loginWithPassword(identifier: string, password: string): RegisterResult {
-  const user = findUserByIdentifier(identifier);
-  if (!user) return { ok: false, error: 'Account not found. Please register first.' };
-  if (user.password !== password) return { ok: false, error: 'Invalid password.' };
-  return { ok: true, user };
-}
-
 export function hasBiometricSupport() {
   return typeof window !== 'undefined' && !!window.PublicKeyCredential && !!navigator.credentials;
+}
+
+function profileToAuthUser(profile: Record<string, unknown>): AuthUser {
+  return {
+    id: profile.id as string,
+    name: profile.name as string,
+    class: profile.class as string,
+    division: profile.division as string,
+    rollNo: profile.roll_no as number,
+    avatar: profile.avatar as string,
+    email: profile.email as string,
+    biometricCredentialId: (profile.biometric_credential_id as string) || undefined,
+  };
 }
 
 export async function registerBiometric(user: AuthUser): Promise<RegisterResult> {
@@ -192,27 +112,57 @@ export async function registerBiometric(user: AuthUser): Promise<RegisterResult>
     }
 
     const credentialId = toBase64Url(new Uint8Array(credential.rawId));
-    const users = getUsers();
-    const updated = users.map((u) =>
-      u.id === user.id ? { ...u, biometricCredentialId: credentialId } : u,
-    );
-    saveUsers(updated);
 
-    const updatedUser = updated.find((u) => u.id === user.id) || user;
+    // Save credential ID to Supabase
+    const { error } = await supabase
+      .from('student_profiles')
+      .update({ biometric_credential_id: credentialId })
+      .eq('id', user.id);
+
+    if (error) {
+      return { ok: false, error: 'Failed to save biometric data.' };
+    }
+
+    const updatedUser = { ...user, biometricCredentialId: credentialId };
     return { ok: true, user: updatedUser };
   } catch {
     return { ok: false, error: 'Biometric setup was cancelled or failed.' };
   }
 }
 
-export async function loginWithBiometric(identifier: string): Promise<RegisterResult> {
-  const user = identifier ? findUserByIdentifier(identifier) : getRememberedUser();
-  if (!user) return { ok: false, error: 'Account not found for biometric login.' };
-  if (!user.biometricCredentialId) {
-    return { ok: false, error: 'Biometric login is not enabled for this account yet.' };
-  }
+export async function loginWithBiometric(email?: string): Promise<RegisterResult> {
   if (!hasBiometricSupport()) {
     return { ok: false, error: 'Face/Fingerprint login is not supported on this device.' };
+  }
+
+  // Find the user's profile to get the credential ID
+  let profile: Record<string, unknown> | null = null;
+
+  if (email) {
+    const { data } = await supabase
+      .from('student_profiles')
+      .select('*')
+      .eq('email', normalizeEmail(email))
+      .single();
+    profile = data;
+  } else {
+    // Try to get from current session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { data } = await supabase
+        .from('student_profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      profile = data;
+    }
+  }
+
+  if (!profile) {
+    return { ok: false, error: 'Account not found for biometric login.' };
+  }
+  if (!profile.biometric_credential_id) {
+    return { ok: false, error: 'Biometric login is not enabled for this account yet.' };
   }
 
   try {
@@ -221,7 +171,7 @@ export async function loginWithBiometric(identifier: string): Promise<RegisterRe
         challenge: randomBytes(32),
         allowCredentials: [
           {
-            id: fromBase64Url(user.biometricCredentialId),
+            id: fromBase64Url(profile.biometric_credential_id as string),
             type: 'public-key',
           },
         ],
@@ -234,10 +184,147 @@ export async function loginWithBiometric(identifier: string): Promise<RegisterRe
       return { ok: false, error: 'Biometric verification failed.' };
     }
 
-    return { ok: true, user };
+    // Sign in with Supabase using stored session (biometric is a client-side check)
+    // The user must already have an active session or we need their password
+    // For biometric, we rely on the existing Supabase session being valid
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return { ok: false, error: 'Session expired. Please login with password first, then enable biometric.' };
+    }
+
+    return { ok: true, user: profileToAuthUser(profile) };
   } catch {
     return { ok: false, error: 'Biometric verification was cancelled or failed.' };
   }
+}
+
+export async function registerUser(input: RegisterInput): Promise<RegisterResult> {
+  const email = normalizeEmail(input.email);
+  const className = normalizeClassName(input.className);
+  const division = input.division.trim().toUpperCase();
+
+  if (!input.name.trim() || !className || !division || !input.rollNo || !email || !input.password) {
+    return { ok: false, error: 'Please fill all required fields.' };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: 'Enter a valid email address.' };
+  }
+  if (input.password.length < 6) {
+    return { ok: false, error: 'Password must be at least 6 characters.' };
+  }
+
+  // Check duplicate roll number
+  const { data: existing } = await supabase
+    .from('student_profiles')
+    .select('id')
+    .eq('class', className)
+    .eq('division', division)
+    .eq('roll_no', input.rollNo)
+    .maybeSingle();
+
+  if (existing) {
+    return { ok: false, error: 'This class/division/roll number already exists.' };
+  }
+
+  // Sign up with Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password: input.password,
+  });
+
+  if (authError || !authData.user) {
+    if (authError?.message?.includes('already registered')) {
+      return { ok: false, error: 'This email is already registered.' };
+    }
+    return { ok: false, error: authError?.message || 'Registration failed.' };
+  }
+
+  const userId = authData.user.id;
+  const avatar = input.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)];
+
+  // Insert student profile
+  const { error: profileError } = await supabase.from('student_profiles').insert({
+    id: userId,
+    name: input.name.trim(),
+    class: className,
+    division,
+    roll_no: input.rollNo,
+    avatar,
+    email,
+  });
+
+  if (profileError) {
+    return { ok: false, error: profileError.message };
+  }
+
+  // Insert initial game progress
+  await supabase.from('game_progress').insert({
+    user_id: userId,
+    completed_stations: [],
+    stars: 0,
+    current_island: null,
+    current_station: 0,
+    earned_rewards: [],
+  });
+
+  const user: AuthUser = {
+    id: userId,
+    name: input.name.trim(),
+    class: className,
+    division,
+    rollNo: input.rollNo,
+    avatar,
+    email,
+  };
+
+  return { ok: true, user };
+}
+
+export async function loginWithPassword(identifier: string, password: string): Promise<RegisterResult> {
+  const email = normalizeEmail(identifier);
+
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (authError || !authData.user) {
+    if (authError?.message?.includes('Invalid login')) {
+      return { ok: false, error: 'Invalid email or password.' };
+    }
+    return { ok: false, error: authError?.message || 'Login failed.' };
+  }
+
+  const { data: profile } = await supabase
+    .from('student_profiles')
+    .select('*')
+    .eq('id', authData.user.id)
+    .single();
+
+  if (!profile) {
+    return { ok: false, error: 'Profile not found. Please register first.' };
+  }
+
+  return { ok: true, user: profileToAuthUser(profile) };
+}
+
+export async function getSession(): Promise<AuthUser | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+
+  const { data: profile } = await supabase
+    .from('student_profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+
+  if (!profile) return null;
+
+  return profileToAuthUser(profile);
+}
+
+export async function logoutUser(): Promise<void> {
+  await supabase.auth.signOut();
 }
 
 export function toStudentProfile(user: AuthUser): StudentProfile {

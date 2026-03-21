@@ -5,12 +5,9 @@ import { useGame } from '@/contexts/GameContext';
 import GuideCharacter from '@/components/GuideCharacter';
 import { Fingerprint, ScanFace } from 'lucide-react';
 import {
-  getRememberedUser,
-  getUsers,
   hasBiometricSupport,
   loginWithBiometric,
   loginWithPassword,
-  rememberUser,
   registerBiometric,
   registerUser,
   toStudentProfile,
@@ -20,7 +17,6 @@ type AuthMode = 'login' | 'register';
 
 export default function LoginScreen() {
   const [mode, setMode] = useState<AuthMode>('login');
-  const [showManualLogin, setShowManualLogin] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -39,24 +35,26 @@ export default function LoginScreen() {
   const navigate = useNavigate();
   const { login } = useGame();
 
-  const users = getUsers();
-  const rememberedUser = getRememberedUser();
-  const firstTime = users.length === 0;
   const biometricSupported = hasBiometricSupport();
-  const quickUnlockAvailable = Boolean(rememberedUser?.biometricCredentialId) && biometricSupported;
 
-  const onLoginWithPassword = (event: FormEvent) => {
+  const helpMessage = mode === 'register'
+    ? 'First time here? Please create your profile first. 😊'
+    : 'Login using Email + Password, or Face/Fingerprint.';
+
+  const onLoginWithPassword = async (event: FormEvent) => {
     event.preventDefault();
     setError('');
     setSuccess('');
+    setBusy(true);
 
-    const result = loginWithPassword(emailLogin, password);
+    const result = await loginWithPassword(emailLogin, password);
+    setBusy(false);
+
     if (!result.ok || !result.user) {
       setError(result.error || 'Login failed.');
       return;
     }
 
-    rememberUser(result.user.id);
     login(toStudentProfile(result.user));
     navigate('/world');
   };
@@ -71,7 +69,8 @@ export default function LoginScreen() {
       return;
     }
 
-    const result = registerUser({
+    setBusy(true);
+    const result = await registerUser({
       name,
       className,
       division,
@@ -81,15 +80,14 @@ export default function LoginScreen() {
     });
 
     if (!result.ok || !result.user) {
+      setBusy(false);
       setError(result.error || 'Registration failed.');
       return;
     }
 
     let finalUser = result.user;
     if (biometricSupported) {
-      setBusy(true);
       const biometric = await registerBiometric(result.user);
-      setBusy(false);
       if (biometric.ok && biometric.user) {
         finalUser = biometric.user;
         setSuccess('Registration successful. Face/Fingerprint login enabled.');
@@ -97,10 +95,10 @@ export default function LoginScreen() {
         setSuccess('Registration successful. You can enable Face/Fingerprint later.');
       }
     } else {
-      setSuccess('Registration successful. Face/Fingerprint is not supported on this device.');
+      setSuccess('Registration successful.');
     }
 
-    rememberUser(finalUser.id);
+    setBusy(false);
     login(toStudentProfile(finalUser));
     navigate('/world');
   };
@@ -109,7 +107,7 @@ export default function LoginScreen() {
     setError('');
     setSuccess('');
     setBusy(true);
-    const result = await loginWithBiometric(showManualLogin ? emailLogin : '');
+    const result = await loginWithBiometric(emailLogin || undefined);
     setBusy(false);
 
     if (!result.ok || !result.user) {
@@ -117,16 +115,9 @@ export default function LoginScreen() {
       return;
     }
 
-    rememberUser(result.user.id);
     login(toStudentProfile(result.user));
     navigate('/world');
   };
-
-  const helpMessage = firstTime
-    ? 'First time here? Please create your profile first. 😊'
-    : quickUnlockAvailable && !showManualLogin
-      ? `Welcome back, ${rememberedUser?.name}! Use Face/Fingerprint to continue.`
-      : 'Login using Email + Password, or Face/Fingerprint.';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-fun-purple/10 via-background to-secondary/20 flex flex-col items-center justify-center px-4 sm:px-6">
@@ -159,42 +150,7 @@ export default function LoginScreen() {
           {error && <p className="mb-3 text-xs font-body text-red-600">{error}</p>}
           {success && <p className="mb-3 text-xs font-body text-green-700">{success}</p>}
 
-          {mode === 'login' && quickUnlockAvailable && !showManualLogin && rememberedUser && (
-            <div className="space-y-4 text-center">
-              <motion.div
-                className="rounded-2xl border border-primary/20 bg-primary/5 p-4"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <div className="text-5xl mb-2">{rememberedUser.avatar}</div>
-                <h2 className="font-display text-lg text-foreground">{rememberedUser.name}</h2>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {rememberedUser.class} • Division {rememberedUser.division} • Roll No. {rememberedUser.rollNo}
-                </p>
-              </motion.div>
-
-              <button
-                type="button"
-                onClick={onBiometricLogin}
-                className="w-full py-3 rounded-xl bg-secondary text-foreground font-display flex items-center justify-center gap-2"
-                disabled={busy}
-              >
-                <ScanFace className="w-4 h-4" />
-                <Fingerprint className="w-4 h-4" />
-                {busy ? 'Verifying...' : 'Unlock with Face/Fingerprint'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setShowManualLogin(true); setError(''); setSuccess(''); }}
-                className="w-full py-2 rounded-xl bg-muted text-foreground text-sm"
-              >
-                Use Another Account
-              </button>
-            </div>
-          )}
-
-          {mode === 'login' && (!quickUnlockAvailable || showManualLogin) && (
+          {mode === 'login' && (
             <form className="space-y-3" onSubmit={onLoginWithPassword}>
               <input
                 value={emailLogin}
@@ -217,7 +173,7 @@ export default function LoginScreen() {
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display"
                 disabled={busy}
               >
-                Login with Password
+                {busy ? 'Logging in...' : 'Login with Password'}
               </button>
 
               <div className="pt-2 border-t border-border/60">
@@ -236,16 +192,6 @@ export default function LoginScreen() {
                   <p className="mt-2 text-xs text-muted-foreground">Biometric login is not supported on this browser/device.</p>
                 )}
               </div>
-
-              {quickUnlockAvailable && (
-                <button
-                  type="button"
-                  onClick={() => { setShowManualLogin(false); setError(''); setSuccess(''); }}
-                  className="w-full py-2 rounded-xl bg-muted text-foreground text-sm"
-                >
-                  Back to Quick Unlock
-                </button>
-              )}
             </form>
           )}
 
@@ -275,7 +221,7 @@ export default function LoginScreen() {
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display"
                 disabled={busy}
               >
-                {busy ? 'Setting up Face/Fingerprint...' : 'Create Account'}
+                {busy ? 'Setting up...' : 'Create Account'}
               </button>
 
               <p className="text-[11px] text-muted-foreground">
