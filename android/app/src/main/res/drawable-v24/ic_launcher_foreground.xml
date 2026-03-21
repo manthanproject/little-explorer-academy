@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icon foreground for Little Explorer Academy.
+  Displays on the purple (#7C3AED) ic_launcher_background.
+  All art sits within the 66dp safe zone circle centred at 54,54.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Train body (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M26,60 L82,60 Q86,60 86,64 L86,78 Q86,82 82,82 L26,82 Q22,82 22,78 L22,64 Q22,60 26,60 Z" />
+    <!-- Cab -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M68,48 L82,48 Q86,48 86,52 L86,60 L64,60 L64,52 Q64,48 68,48 Z" />
+    <!-- Cab window -->
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M66,51 L84,51 L84,58 L66,58 Z" />
+    <!-- Smokestack -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M76,38 L81,38 L81,48 L76,48 Z" />
+    <!-- Body windows -->
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M28,65 L40,65 L40,74 L28,74 Z" />
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M46,65 L58,65 L58,74 L46,74 Z" />
+    <!-- Wheels -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M27,82 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M51,82 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M71,82 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z" />
+    <!-- Gold star above train -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,26 L56.2,33 L63,33 L57.4,37.2 L59.6,44 L54,39.8 L48.4,44 L50.6,37.2 L45,33 L51.8,33 Z" />
+</vector>

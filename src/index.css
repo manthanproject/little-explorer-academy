@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Bubblegum+Sans&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 45 100% 96%;
+    --foreground: 280 40% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 280 40% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 280 40% 20%;
+
+    --primary: 25 95% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 200 85% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 45 30% 90%;
+    --muted-foreground: 280 20% 50%;
+
+    --accent: 145 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 45 40% 85%;
+    --input: 45 40% 85%;
+    --ring: 25 95% 60%;
+
+    --radius: 1rem;
+
+    --island-alphabet: 340 80% 65%;
+    --island-number: 200 85% 60%;
+    --island-animal: 145 60% 50%;
+    --reward-gold: 45 100% 55%;
+    --fun-purple: 280 70% 60%;
+    --fun-pink: 340 80% 65%;
+    --fun-yellow: 45 100% 60%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 280 30% 10%;
+    --foreground: 45 100% 96%;
+    --card: 280 30% 15%;
+    --card-foreground: 45 100% 96%;
+    --popover: 280 30% 15%;
+    --popover-foreground: 45 100% 96%;
+    --primary: 25 95% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 85% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 280 20% 20%;
+    --muted-foreground: 45 30% 70%;
+    --accent: 145 60% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 280 20% 25%;
+    --input: 280 20% 25%;
+    --ring: 25 95% 60%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Fredoka', sans-serif;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bubblegum Sans', cursive;
+  }
+}
+
+@layer utilities {
+  .text-shadow-fun {
+    text-shadow: 2px 2px 0px hsl(var(--primary) / 0.3);
+  }
+  
+  .bounce-hover:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Custom scrollbar for kids */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.5);
+  border-radius: 10px;
+}

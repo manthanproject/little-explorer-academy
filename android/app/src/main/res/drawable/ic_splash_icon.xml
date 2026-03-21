@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Splash screen centre icon for Little Explorer Academy.
+  Shown on a purple (#7C3AED) background via windowSplashScreenBackground.
+  A simple train (the app's core motif) in white.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Train body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,52 L90,52 Q94,52 94,56 L94,76 Q94,80 90,80 L18,80 Q14,80 14,76 L14,56 Q14,52 18,52 Z" />
+
+    <!-- Cab (driver window area) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M72,38 L90,38 Q94,38 94,42 L94,52 L68,52 L68,42 Q68,38 72,38 Z" />
+
+    <!-- Cab window -->
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M74,42 L88,42 L88,50 L74,50 Z" />
+
+    <!-- Smokestack -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M80,28 L86,28 L86,38 L80,38 Z" />
+
+    <!-- Train body windows -->
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M22,58 L36,58 L36,68 L22,68 Z" />
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M42,58 L56,58 L56,68 L42,68 Z" />
+
+    <!-- Wheels -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M26,80 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,80 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M82,80 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+
+    <!-- Star decoration -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,20 L56,26 L62,26 L57,30 L59,36 L54,32 L49,36 L51,30 L46,26 L52,26 Z" />
+</vector>
