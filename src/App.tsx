@@ -13,6 +13,7 @@ import StationView from "./pages/StationView";
 import GameScreen from "./pages/GameScreen";
 import RewardScreen from "./pages/RewardScreen";
 import ProfileScreen from "./pages/ProfileScreen";
+import WelcomeScreen from "./pages/WelcomeScreen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,7 +35,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<SplashScreen />} />
-      <Route path="/login" element={isLoggedIn ? <Navigate to="/world" replace /> : <LoginScreen />} />
+      <Route path="/login" element={isLoggedIn ? <Navigate to="/welcome" replace /> : <LoginScreen />} />
+      <Route path="/welcome" element={isLoggedIn ? <WelcomeScreen /> : <Navigate to="/login" replace />} />
       <Route path="/world" element={isLoggedIn ? <WorldMap /> : <Navigate to="/login" replace />} />
       <Route path="/train" element={isLoggedIn ? <TrainJourney /> : <Navigate to="/login" replace />} />
       <Route path="/stations" element={isLoggedIn ? <StationsList /> : <Navigate to="/login" replace />} />

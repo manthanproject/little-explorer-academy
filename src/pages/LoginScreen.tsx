@@ -62,7 +62,7 @@ export default function LoginScreen() {
     }
 
     login(toStudentProfile(result.user));
-    navigate('/world');
+    navigate('/welcome');
   };
 
   const onRegister = async (event: FormEvent) => {
@@ -106,7 +106,7 @@ export default function LoginScreen() {
 
     setBusy(false);
     login(toStudentProfile(finalUser));
-    navigate('/world');
+    navigate('/welcome');
   };
 
   const onBiometricLogin = async () => {
@@ -122,7 +122,7 @@ export default function LoginScreen() {
     }
 
     login(toStudentProfile(result.user));
-    navigate('/world');
+    navigate('/welcome');
   };
 
   return (
