@@ -77,6 +77,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const login = useCallback((profile: StudentProfile) => {
     setStudent(profile);
     setIsLoggedIn(true);
+
+    // Log login history
+    supabase.from('login_history').insert({
+      user_id: profile.id,
+      device_info: navigator.userAgent,
+    }).then(() => {});
   }, []);
 
   const logout = useCallback(async () => {
@@ -179,13 +185,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ? Math.min(currentStationIndex + 1, currentIsland.stations.length - 1)
         : prev.currentStation;
 
+      // Log station activity to Supabase
+      if (student && currentIsland) {
+        const station = currentIsland.stations.find(s => s.id === stationId);
+        supabase.from('station_activity').insert({
+          user_id: student.id,
+          station_id: stationId,
+          island_id: currentIsland.id,
+          game_type: station?.gameType || 'unknown',
+          stars_earned: 3,
+        }).then(() => {});
+      }
+
       return {
         ...prev,
         completedStations: [...prev.completedStations, stationId],
         currentStation: currentStationIndex >= 0 ? nextStationIndex : prev.currentStation,
       };
     });
-  }, [currentIslands]);
+  }, [currentIslands, student]);
 
   const addStars = useCallback((count: number) => {
     setProgress(prev => ({ ...prev, stars: prev.stars + count }));
