@@ -79,7 +79,27 @@ function profileToAuthUser(profile: Record<string, unknown>): AuthUser {
   };
 }
 
-export async function registerBiometric(user: AuthUser): Promise<RegisterResult> {
+const BIOMETRIC_EMAIL_KEY = 'lea_biometric_email';
+const BIOMETRIC_TOKEN_KEY = 'lea_biometric_token';
+
+// Store credentials locally for biometric re-auth
+export function saveBiometricCredentials(email: string, password: string) {
+  localStorage.setItem(BIOMETRIC_EMAIL_KEY, email);
+  localStorage.setItem(BIOMETRIC_TOKEN_KEY, btoa(password));
+}
+
+function getBiometricCredentials(): { email: string; password: string } | null {
+  const email = localStorage.getItem(BIOMETRIC_EMAIL_KEY);
+  const token = localStorage.getItem(BIOMETRIC_TOKEN_KEY);
+  if (!email || !token) return null;
+  try {
+    return { email, password: atob(token) };
+  } catch {
+    return null;
+  }
+}
+
+export async function registerBiometric(user: AuthUser, password: string): Promise<RegisterResult> {
   if (!hasBiometricSupport()) {
     return { ok: false, error: 'Face/Fingerprint login is not supported on this device.' };
   }
@@ -123,6 +143,9 @@ export async function registerBiometric(user: AuthUser): Promise<RegisterResult>
       return { ok: false, error: 'Failed to save biometric data.' };
     }
 
+    // Save credentials locally for biometric re-auth
+    saveBiometricCredentials(user.email, password);
+
     const updatedUser = { ...user, biometricCredentialId: credentialId };
     return { ok: true, user: updatedUser };
   } catch {
@@ -137,12 +160,14 @@ export async function loginWithBiometric(email?: string): Promise<RegisterResult
 
   // Find the user's profile to get the credential ID
   let profile: Record<string, unknown> | null = null;
+  const storedCreds = getBiometricCredentials();
+  const lookupEmail = email ? normalizeEmail(email) : storedCreds?.email;
 
-  if (email) {
+  if (lookupEmail) {
     const { data } = await supabase
       .from('student_profiles')
       .select('*')
-      .eq('email', normalizeEmail(email))
+      .eq('email', lookupEmail)
       .single();
     profile = data;
   } else {
@@ -159,7 +184,7 @@ export async function loginWithBiometric(email?: string): Promise<RegisterResult
   }
 
   if (!profile) {
-    return { ok: false, error: 'Account not found for biometric login.' };
+    return { ok: false, error: 'No biometric account found on this device. Please login with password first.' };
   }
   if (!profile.biometric_credential_id) {
     return { ok: false, error: 'Biometric login is not enabled for this account yet.' };
@@ -184,12 +209,21 @@ export async function loginWithBiometric(email?: string): Promise<RegisterResult
       return { ok: false, error: 'Biometric verification failed.' };
     }
 
-    // Sign in with Supabase using stored session (biometric is a client-side check)
-    // The user must already have an active session or we need their password
-    // For biometric, we rely on the existing Supabase session being valid
+    // Check if we have an active session
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      return { ok: false, error: 'Session expired. Please login with password first, then enable biometric.' };
+      // No active session — re-authenticate using stored credentials
+      if (storedCreds) {
+        const { error: authError } = await supabase.auth.signInWithPassword({
+          email: storedCreds.email,
+          password: storedCreds.password,
+        });
+        if (authError) {
+          return { ok: false, error: 'Session expired and re-login failed. Please login with password.' };
+        }
+      } else {
+        return { ok: false, error: 'Session expired. Please login with password first.' };
+      }
     }
 
     return { ok: true, user: profileToAuthUser(profile) };

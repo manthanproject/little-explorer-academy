@@ -10,6 +10,7 @@ import {
   loginWithPassword,
   registerBiometric,
   registerUser,
+  saveBiometricCredentials,
   toStudentProfile,
 } from '@/lib/auth';
 
@@ -55,6 +56,11 @@ export default function LoginScreen() {
       return;
     }
 
+    // Save credentials for biometric re-auth
+    if (result.user.biometricCredentialId) {
+      saveBiometricCredentials(result.user.email, password);
+    }
+
     login(toStudentProfile(result.user));
     navigate('/world');
   };
@@ -87,7 +93,7 @@ export default function LoginScreen() {
 
     let finalUser = result.user;
     if (biometricSupported) {
-      const biometric = await registerBiometric(result.user);
+      const biometric = await registerBiometric(result.user, regPassword);
       if (biometric.ok && biometric.user) {
         finalUser = biometric.user;
         setSuccess('Registration successful. Face/Fingerprint login enabled.');
