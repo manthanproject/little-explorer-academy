@@ -126,7 +126,7 @@ export default function WorldMap() {
               >
                 <div className="relative flex flex-col items-center justify-center py-1 sm:py-2">
                   <motion.div
-                    className="h-[21vh] w-[54vw] min-h-[124px] min-w-[170px] max-h-[210px] max-w-[280px] sm:h-64 sm:w-[340px] max-[700px]:h-[18vh] max-[700px]:w-[48vw] max-[700px]:min-h-[106px] max-[700px]:min-w-[146px] max-[700px]:max-h-[170px] max-[700px]:max-w-[230px]"
+                    className="h-[28vh] w-[68vw] min-h-[160px] min-w-[220px] max-h-[280px] max-w-[360px] sm:h-72 sm:w-[400px] max-[700px]:h-[24vh] max-[700px]:w-[62vw] max-[700px]:min-h-[140px] max-[700px]:min-w-[190px] max-[700px]:max-h-[230px] max-[700px]:max-w-[300px]"
                     animate={{ y: [0, -6, 0], rotateZ: [0, 1.5, -1.5, 0] }}
                     transition={{ duration: 3.6, repeat: Infinity, delay: i * 0.35 }}
                   >
