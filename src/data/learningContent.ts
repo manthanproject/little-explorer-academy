@@ -48,7 +48,7 @@ export const islands: Island[] = [
         id: 'def',
         name: 'Phonics & Sounds',
         gameType: 'match',
-        gameUrl: 'https://www.madkidgames.com/full/sunny-school-stories',
+        gameUrl: 'https://www.madkidgames.com/full/pretend-preschool-kids-games',
         videoUrl: 'https://youtu.be/6kRMSkYzBMk',
         items: [
           { id: 'd', label: 'b', emoji: '🔊', description: 'Phonics sound for letter B', color: 'hsl(25, 70%, 50%)' },
@@ -60,7 +60,7 @@ export const islands: Island[] = [
         id: 'ghi',
         name: 'Simple Words',
         gameType: 'tap',
-        gameUrl: 'https://www.madkidgames.com/full/wolfoo-a-day-at-school',
+        gameUrl: 'https://www.madkidgames.com/full/happy-daycare-stories-school',
         videoUrl: 'https://youtu.be/oQP3hMwJ8o0',
         items: [
           { id: 'g', label: 'cat', emoji: '🐱', description: 'Read the word cat', color: 'hsl(280, 60%, 50%)' },
@@ -72,7 +72,7 @@ export const islands: Island[] = [
         id: 'jkl',
         name: 'Short Sentences',
         gameType: 'match',
-        gameUrl: 'https://www.madkidgames.com/full/word-search-word-puzzle',
+        gameUrl: 'https://www.madkidgames.com/full/dr-panda-town-tales',
         videoUrl: 'https://youtu.be/IY2t2blR5RE',
         items: [
           { id: 'j', label: 'I am Sam', emoji: '📝', description: 'Read a short sentence', color: 'hsl(40, 90%, 55%)' },
@@ -84,7 +84,7 @@ export const islands: Island[] = [
         id: 'alphabet-review',
         name: 'Story Reading',
         gameType: 'pop',
-        gameUrl: 'https://www.madkidgames.com/full/sunny-school-stories',
+        gameUrl: 'https://www.madkidgames.com/full/toca-boca-life-town',
         videoUrl: 'https://youtu.be/gDCJ6wSpNoU',
         items: [
           { id: 'a2', label: 'Story 1', emoji: '📘', description: 'Read a short story', color: 'hsl(0, 80%, 60%)' },
@@ -117,7 +117,7 @@ export const islands: Island[] = [
         id: 'num-4-6',
         name: 'Counting Objects',
         gameType: 'count',
-        gameUrl: 'https://www.madkidgames.com/full/wolfoo-learns-numbers-and-shapes',
+        gameUrl: 'https://www.madkidgames.com/full/one-line-puzzle-game',
         videoUrl: 'https://youtu.be/P8S09KZrHt0',
         items: [
           { id: 'n4', label: 'Count Apples', emoji: '🍎', description: 'Count objects carefully', color: 'hsl(330, 70%, 60%)' },
@@ -129,7 +129,7 @@ export const islands: Island[] = [
         id: 'num-7-9',
         name: 'Addition',
         gameType: 'count',
-        gameUrl: 'https://www.madkidgames.com/full/domino-hexa-puzzle',
+        gameUrl: 'https://www.madkidgames.com/full/heroes-of-chess',
         videoUrl: 'https://youtu.be/gf97tXwTDe0',
         items: [
           { id: 'n7', label: '1 + 2', emoji: '➕', description: 'Learn basic addition', color: 'hsl(50, 100%, 55%)' },
@@ -141,7 +141,7 @@ export const islands: Island[] = [
         id: 'num-10',
         name: 'Subtraction',
         gameType: 'tap',
-        gameUrl: 'https://www.madkidgames.com/full/wolfoo-learns-numbers-and-shapes',
+        gameUrl: 'https://www.madkidgames.com/full/art-by-numbers-5',
         videoUrl: 'https://youtu.be/jsoAuqfnhnA',
         items: [
           { id: 'n10', label: '5 - 2', emoji: '➖', description: 'Learn basic subtraction', color: 'hsl(25, 90%, 55%)' },
@@ -151,7 +151,7 @@ export const islands: Island[] = [
         id: 'number-review',
         name: 'Shapes',
         gameType: 'count',
-        gameUrl: 'https://www.madkidgames.com/full/domino-hexa-puzzle',
+        gameUrl: 'https://www.madkidgames.com/full/wolfoo-learns-numbers-and-shapes',
         videoUrl: 'https://youtu.be/lcl8uB2AWM0',
         items: [
           { id: 'nc1', label: 'Circle', emoji: '⚪', description: 'Identify circle shape', color: 'hsl(0, 70%, 55%)' },
@@ -171,7 +171,7 @@ export const islands: Island[] = [
         id: 'farm',
         name: 'My Family',
         gameType: 'find',
-        gameUrl: 'https://www.madkidgames.com/full/my-town-school',
+        gameUrl: 'https://www.madkidgames.com/full/my-town-home-family-playhouse',
         videoUrl: 'https://www.youtube.com/watch?v=B7qmfsEYe-4',
         items: [
           { id: 'cow', label: 'Father', emoji: '👨', description: 'Learn about family member Father', color: 'hsl(30, 20%, 60%)' },
@@ -183,7 +183,7 @@ export const islands: Island[] = [
         id: 'jungle',
         name: 'My School',
         gameType: 'find',
-        gameUrl: 'https://www.madkidgames.com/full/wolfoo-a-day-at-school',
+        gameUrl: 'https://www.madkidgames.com/full/my-town-school',
         videoUrl: 'https://www.youtube.com/watch?v=8tWmUhCfcvU',
         items: [
           { id: 'lion', label: 'Classroom', emoji: '🏫', description: 'Identify the classroom', color: 'hsl(35, 80%, 55%)' },
@@ -195,7 +195,7 @@ export const islands: Island[] = [
         id: 'birds',
         name: 'Animals & Birds',
         gameType: 'tap',
-        gameUrl: 'https://www.madkidgames.com/full/wolfoo-learns-numbers-and-shapes',
+        gameUrl: 'https://www.madkidgames.com/full/woodiehoo-animal-friends-world',
         videoUrl: 'https://youtu.be/39G0wYrE2Vc',
         items: [
           { id: 'parrot', label: 'Pet Animals', emoji: '🐶', description: 'Learn pet animals', color: 'hsl(120, 70%, 45%)' },
@@ -207,7 +207,7 @@ export const islands: Island[] = [
         id: 'sea',
         name: 'Plants & Trees',
         gameType: 'find',
-        gameUrl: 'https://www.madkidgames.com/full/my-town-school',
+        gameUrl: 'https://www.madkidgames.com/full/pepi-hospital-learn-and-care',
         videoUrl: 'https://youtu.be/oTEsrsjXrmQ',
         items: [
           { id: 'fish', label: 'Roots', emoji: '🌱', description: 'Identify root part of plant', color: 'hsl(190, 80%, 50%)' },
@@ -219,7 +219,7 @@ export const islands: Island[] = [
         id: 'animal-sounds',
         name: 'Good Habits',
         gameType: 'match',
-        gameUrl: 'https://www.madkidgames.com/full/sunny-school-stories',
+        gameUrl: 'https://www.madkidgames.com/full/sweet-home-stories',
         videoUrl: 'https://youtu.be/cnzPAznVW5w',
         items: [
           { id: 's-cow', label: 'Brushing Teeth', emoji: '🪥', description: 'Practice brushing teeth habit', color: 'hsl(30, 20%, 60%)' },
