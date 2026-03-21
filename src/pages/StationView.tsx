@@ -98,15 +98,6 @@ export default function StationView() {
 
       <div className="mt-5 sm:mt-6 mx-auto flex w-full max-w-3xl gap-3">
         <motion.button
-          onClick={() => window.open(youtubeUrl, '_blank', 'noopener,noreferrer')}
-          className="flex-1 px-4 py-3 bg-secondary/20 text-foreground rounded-2xl font-display text-sm sm:text-base shadow-md flex items-center justify-center gap-2 touch-target"
-          whileTap={{ scale: 0.97 }}
-        >
-          <ExternalLink className="w-4 h-4" />
-          Open on YouTube
-        </motion.button>
-
-        <motion.button
           onClick={() => navigate('/stations')}
           className="flex-1 px-4 py-3 bg-primary text-primary-foreground rounded-2xl font-display text-sm sm:text-base shadow-md touch-target"
           whileTap={{ scale: 0.97 }}
