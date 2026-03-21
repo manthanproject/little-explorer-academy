@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { isNativePlatform, authenticateNative } from './nativeBiometric';
 import type { StudentProfile } from '@/contexts/GameContext';
 
 export interface AuthUser extends StudentProfile {
@@ -63,6 +64,7 @@ function fromBase64Url(base64url: string) {
 }
 
 export function hasBiometricSupport() {
+  if (isNativePlatform()) return true;
   return typeof window !== 'undefined' && !!window.PublicKeyCredential && !!navigator.credentials;
 }
 
@@ -104,6 +106,29 @@ export async function registerBiometric(user: AuthUser, password: string): Promi
     return { ok: false, error: 'Face/Fingerprint login is not supported on this device.' };
   }
 
+  // Native Android/iOS — use device biometric directly
+  if (isNativePlatform()) {
+    const verified = await authenticateNative('Set up biometric login for Little Explorer Academy');
+    if (!verified) {
+      return { ok: false, error: 'Biometric setup was cancelled or failed.' };
+    }
+
+    const credentialId = `native_${user.id}`;
+
+    const { error } = await supabase
+      .from('student_profiles')
+      .update({ biometric_credential_id: credentialId })
+      .eq('id', user.id);
+
+    if (error) {
+      return { ok: false, error: 'Failed to save biometric data.' };
+    }
+
+    saveBiometricCredentials(user.email, password);
+    return { ok: true, user: { ...user, biometricCredentialId: credentialId } };
+  }
+
+  // Web — use WebAuthn
   try {
     const credential = (await navigator.credentials.create({
       publicKey: {
@@ -190,6 +215,31 @@ export async function loginWithBiometric(email?: string): Promise<RegisterResult
     return { ok: false, error: 'Biometric login is not enabled for this account yet.' };
   }
 
+  // Native Android/iOS — use device biometric (face/fingerprint)
+  if (isNativePlatform()) {
+    const verified = await authenticateNative('Verify your identity to login');
+    if (!verified) {
+      return { ok: false, error: 'Biometric verification was cancelled or failed.' };
+    }
+
+    // Re-authenticate with Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session && storedCreds) {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: storedCreds.email,
+        password: storedCreds.password,
+      });
+      if (authError) {
+        return { ok: false, error: 'Session expired and re-login failed. Please login with password.' };
+      }
+    } else if (!session) {
+      return { ok: false, error: 'Session expired. Please login with password first.' };
+    }
+
+    return { ok: true, user: profileToAuthUser(profile) };
+  }
+
+  // Web — use WebAuthn
   try {
     const assertion = (await navigator.credentials.get({
       publicKey: {
@@ -212,7 +262,6 @@ export async function loginWithBiometric(email?: string): Promise<RegisterResult
     // Check if we have an active session
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      // No active session — re-authenticate using stored credentials
       if (storedCreds) {
         const { error: authError } = await supabase.auth.signInWithPassword({
           email: storedCreds.email,
