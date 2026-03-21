@@ -174,7 +174,7 @@ export default function StationsList() {
                             <div className="min-w-0">
                               <p className="text-[11px] font-body uppercase tracking-[0.22em] text-foreground/55">Stop {index + 1}</p>
                               <h3 className="truncate font-display text-lg text-foreground">{station.name}</h3>
-                              <p className="mt-1 text-xs font-body text-foreground/65">{getStationPreview(index) || `${station.items.length} lesson items`}</p>
+                              <p className="mt-1 text-xs font-body text-foreground/65">{station.items.length} lesson items</p>
                             </div>
                             <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-body uppercase tracking-[0.18em] ${isCompleted ? 'bg-emerald-500/12 text-emerald-700' : isCurrent ? theme.accentSoft : isUnlocked ? 'bg-slate-100 text-slate-700' : 'bg-slate-200/80 text-slate-500'}`}>
                               {getStationState(index, station.id)}
