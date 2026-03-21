@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 import GuideCharacter from '@/components/GuideCharacter';
+import BiometricAnimation from '@/components/BiometricAnimation';
 import { Fingerprint, ScanFace } from 'lucide-react';
 import {
   hasBiometricSupport,
@@ -21,6 +22,7 @@ export default function LoginScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [biometricAnim, setBiometricAnim] = useState<'face' | 'fingerprint' | null>(null);
 
   const [emailLogin, setEmailLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -109,9 +111,14 @@ export default function LoginScreen() {
     navigate('/welcome');
   };
 
-  const onBiometricLogin = async () => {
+  const onBiometricLogin = (type: 'face' | 'fingerprint') => {
     setError('');
     setSuccess('');
+    setBiometricAnim(type);
+  };
+
+  const onBiometricAnimComplete = async () => {
+    setBiometricAnim(null);
     setBusy(true);
     const result = await loginWithBiometric(emailLogin || undefined);
     setBusy(false);
@@ -124,6 +131,10 @@ export default function LoginScreen() {
     login(toStudentProfile(result.user));
     navigate('/welcome');
   };
+
+  if (biometricAnim) {
+    return <BiometricAnimation type={biometricAnim} onComplete={onBiometricAnimComplete} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-fun-purple/10 via-background to-secondary/20 flex flex-col items-center justify-center px-4 sm:px-6">
@@ -184,16 +195,26 @@ export default function LoginScreen() {
 
               <div className="pt-2 border-t border-border/60">
                 <p className="text-xs text-muted-foreground mb-2">Face/Fingerprint Login</p>
-                <button
-                  type="button"
-                  onClick={onBiometricLogin}
-                  className="w-full py-3 rounded-xl bg-secondary text-foreground font-display flex items-center justify-center gap-2"
-                  disabled={busy || !biometricSupported}
-                >
-                  <ScanFace className="w-4 h-4" />
-                  <Fingerprint className="w-4 h-4" />
-                  {busy ? 'Verifying...' : 'Login with Face/Fingerprint'}
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onBiometricLogin('face')}
+                    className="py-3 rounded-xl bg-sky-100 text-sky-700 font-display flex items-center justify-center gap-2 text-sm"
+                    disabled={busy || !biometricSupported}
+                  >
+                    <ScanFace className="w-4 h-4" />
+                    Face Login
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onBiometricLogin('fingerprint')}
+                    className="py-3 rounded-xl bg-emerald-100 text-emerald-700 font-display flex items-center justify-center gap-2 text-sm"
+                    disabled={busy || !biometricSupported}
+                  >
+                    <Fingerprint className="w-4 h-4" />
+                    Fingerprint
+                  </button>
+                </div>
                 {!biometricSupported && (
                   <p className="mt-2 text-xs text-muted-foreground">Biometric login is not supported on this browser/device.</p>
                 )}
