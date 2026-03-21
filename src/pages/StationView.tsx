@@ -10,6 +10,19 @@ const subjectByIsland: Record<string, string> = {
   animals: 'EVS / Environmental Studies',
 };
 
+// Extract YouTube video ID from various URL formats
+function getYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 export default function StationView() {
   const navigate = useNavigate();
   const { progress, currentIslands, currentClassLevel } = useGame();
@@ -21,10 +34,14 @@ export default function StationView() {
   if (!station || !item) return null;
 
   const subject = subjectByIsland[island?.id || ''] || 'General Learning';
-  const currentTopic = station.name;
-  const videoQuery = `${island?.name} ${station.name} ${subject} class ${currentClassLevel} kids full lesson`;
-  const embedUrl = `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(videoQuery)}`;
-  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${videoQuery} kid friendly`)}`;
+
+  // Use the specific video URL if available, otherwise fallback to search
+  const videoId = station.videoUrl ? getYouTubeVideoId(station.videoUrl) : null;
+  const embedUrl = videoId
+    ? `https://www.youtube-nocookie.com/embed/${videoId}`
+    : `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(`${station.name} ${subject} class ${currentClassLevel} kids`)}`;
+
+  const youtubeUrl = station.videoUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(`${station.name} ${subject} class ${currentClassLevel} kids`)}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary/20 via-background to-primary/10 px-4 sm:px-6 py-5 sm:py-7">
@@ -47,7 +64,7 @@ export default function StationView() {
       >
         <h2 className="text-xs sm:text-sm font-body uppercase tracking-[0.2em] text-muted-foreground">{island?.name} • {subject}</h2>
         <h1 className="text-lg sm:text-2xl font-display text-foreground">{station.name}</h1>
-        <p className="text-xs sm:text-sm font-body text-muted-foreground mt-1">Kid-friendly YouTube learning videos for Class {currentClassLevel}</p>
+        <p className="text-xs sm:text-sm font-body text-muted-foreground mt-1">Class {currentClassLevel} Learning Video</p>
       </motion.div>
 
       {/* Video player */}
@@ -64,7 +81,7 @@ export default function StationView() {
         </div>
         <div className="aspect-video w-full bg-black">
           <iframe
-            title={`${station.name} - ${currentTopic} kid-friendly video`}
+            title={`${station.name} learning video`}
             src={embedUrl}
             className="h-full w-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -76,17 +93,17 @@ export default function StationView() {
 
       {/* Guide */}
       <div className="mt-4 sm:mt-5 flex justify-center">
-        <GuideCharacter message={`Let us watch and learn: ${currentTopic}`} size="sm" />
+        <GuideCharacter message={`Let us watch and learn: ${station.name}`} size="sm" />
       </div>
 
       <div className="mt-5 sm:mt-6 mx-auto flex w-full max-w-3xl gap-3">
         <motion.button
-          onClick={() => window.open(youtubeSearchUrl, '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open(youtubeUrl, '_blank', 'noopener,noreferrer')}
           className="flex-1 px-4 py-3 bg-secondary/20 text-foreground rounded-2xl font-display text-sm sm:text-base shadow-md flex items-center justify-center gap-2 touch-target"
           whileTap={{ scale: 0.97 }}
         >
           <ExternalLink className="w-4 h-4" />
-          More on YouTube
+          Open on YouTube
         </motion.button>
 
         <motion.button
