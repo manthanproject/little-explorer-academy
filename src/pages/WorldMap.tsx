@@ -70,7 +70,7 @@ export default function WorldMap() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-[100dvh] flex flex-col px-3 sm:px-4 py-2 sm:py-4 overflow-hidden">
+      <div className="relative z-10 min-h-[100dvh] flex flex-col px-3 sm:px-4 py-2 sm:py-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-1 sm:mb-3 gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
@@ -107,7 +107,7 @@ export default function WorldMap() {
         </div>
 
         {/* 3D Islands */}
-        <div className="flex-1 flex flex-col gap-0.5 sm:gap-2 justify-evenly px-1 pb-0.5">
+        <div className="flex-1 flex flex-col gap-0.5 sm:gap-2 justify-evenly px-1 pb-0.5 overflow-y-auto">
           {currentIslands.map((island, i) => {
             const config = islandConfig[island.id];
             const prog = getIslandProgress(island.id);
@@ -126,7 +126,7 @@ export default function WorldMap() {
               >
                 <div className="relative flex flex-col items-center justify-center py-1 sm:py-2">
                   <motion.div
-                    className="h-[28vh] w-[68vw] min-h-[160px] min-w-[220px] max-h-[280px] max-w-[360px] sm:h-72 sm:w-[400px] max-[700px]:h-[24vh] max-[700px]:w-[62vw] max-[700px]:min-h-[140px] max-[700px]:min-w-[190px] max-[700px]:max-h-[230px] max-[700px]:max-w-[300px]"
+                    className="h-[20vh] w-[58vw] min-h-[110px] min-w-[160px] max-h-[240px] max-w-[320px] sm:h-64 sm:w-[360px]"
                     animate={{ y: [0, -6, 0], rotateZ: [0, 1.5, -1.5, 0] }}
                     transition={{ duration: 3.6, repeat: Infinity, delay: i * 0.35 }}
                   >
