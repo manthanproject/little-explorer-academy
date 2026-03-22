@@ -119,6 +119,21 @@
   }
 }
 
+/* Safe area utilities for Android/iOS notch & nav bar */
+.pt-safe { padding-top: max(0.75rem, env(safe-area-inset-top)); }
+.pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+.top-safe { top: max(0.5rem, env(safe-area-inset-top)); }
+.bottom-safe { bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Custom scrollbar for kids */
 ::-webkit-scrollbar {
   width: 8px;

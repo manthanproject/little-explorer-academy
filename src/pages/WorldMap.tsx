@@ -70,7 +70,7 @@ export default function WorldMap() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-[100dvh] flex flex-col px-3 sm:px-4 py-2 sm:py-4">
+      <div className="relative z-10 min-h-[100dvh] flex flex-col px-3 sm:px-4 pt-10 sm:pt-12 pb-20 sm:pb-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-1 sm:mb-3 gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
@@ -84,7 +84,7 @@ export default function WorldMap() {
             </div>
             <motion.button
               onClick={() => navigate('/profile')}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-card/80 backdrop-blur shadow-md flex items-center justify-center flex-shrink-0 touch-target"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-card/80 backdrop-blur shadow-md flex items-center justify-center flex-shrink-0"
               whileTap={{ scale: 0.9 }}
             >
               <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-foreground" />

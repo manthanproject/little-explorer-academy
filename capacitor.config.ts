@@ -5,6 +5,18 @@ const config: CapacitorConfig = {
   appName: "Little Explorer Academy",
   webDir: "dist",
   bundledWebRuntime: false,
+  android: {
+    allowMixedContent: true,
+  },
+  server: {
+    androidScheme: "https",
+    cleartext: true,
+  },
+  plugins: {
+    StatusBar: {
+      overlaysWebView: false,
+    },
+  },
 };
 
 export default config;

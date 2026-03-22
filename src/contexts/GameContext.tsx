@@ -28,7 +28,9 @@ interface GameContextType {
   progress: Progress;
   isLoggedIn: boolean;
   loading: boolean;
+  pendingBiometric: StudentProfile | null;
   login: (profile: StudentProfile) => void;
+  confirmBiometricLogin: () => void;
   logout: () => void;
   completeStation: (stationId: string) => void;
   addStars: (count: number) => void;
@@ -61,6 +63,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [student, setStudent] = useState<StudentProfile | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [pendingBiometric, setPendingBiometric] = useState<StudentProfile | null>(null);
   const [progress, setProgress] = useState<Progress>(defaultProgress);
 
   // Reward tracking
@@ -77,6 +80,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const login = useCallback((profile: StudentProfile) => {
     setStudent(profile);
     setIsLoggedIn(true);
+    setPendingBiometric(null);
 
     // Log login history
     supabase.from('login_history').insert({
@@ -84,6 +88,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       device_info: navigator.userAgent,
     }).then(() => {});
   }, []);
+
+  const confirmBiometricLogin = useCallback(() => {
+    if (pendingBiometric) {
+      login(pendingBiometric);
+    }
+  }, [pendingBiometric, login]);
 
   const logout = useCallback(async () => {
     await logoutUser();
@@ -96,7 +106,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     progressLoaded.current = false;
   }, []);
 
-  // Restore session on mount
+  // Restore session on mount — require biometric before auto-login
   useEffect(() => {
     const restoreSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -108,7 +118,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (profile) {
-          login({
+          const studentProfile: StudentProfile = {
             id: profile.id,
             name: profile.name,
             class: profile.class,
@@ -116,7 +126,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
             rollNo: profile.roll_no,
             avatar: profile.avatar,
             email: profile.email,
-          });
+          };
+
+          // If biometric is set up, require verification before login
+          if (profile.biometric_credential_id) {
+            setPendingBiometric(studentProfile);
+          } else {
+            // No biometric set up — auto-login
+            login(studentProfile);
+          }
         }
       }
       setLoading(false);
@@ -254,7 +272,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   return (
     <GameContext.Provider value={{
-      student, progress, isLoggedIn, loading, login, logout,
+      student, progress, isLoggedIn, loading, pendingBiometric, login, confirmBiometricLogin, logout,
       completeStation, addStars, setCurrentIsland, setCurrentStation, getIslandProgress,
       currentClassLevel, currentIslands,
       earnedRewards, newlyEarnedRewards, clearNewRewards,

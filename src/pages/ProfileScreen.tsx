@@ -13,12 +13,12 @@ export default function ProfileScreen() {
   const overallProgress = Math.round((completedCount / totalStations) * 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-fun-purple/10 via-background to-primary/10 px-3 sm:px-4 py-4 sm:py-6">
+    <div className="min-h-screen bg-gradient-to-b from-fun-purple/10 via-background to-primary/10 px-3 sm:px-4 pt-10 sm:pt-12 pb-20 sm:pb-24">
       {/* Header */}
       <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
         <motion.button
           onClick={() => navigate('/world')}
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-card shadow-lg flex items-center justify-center flex-shrink-0 touch-target"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-card shadow-lg flex items-center justify-center flex-shrink-0"
           whileTap={{ scale: 0.9 }}
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />

@@ -83,7 +83,7 @@ export default function StationsList() {
   };
 
   return (
-    <div className={`min-h-screen overflow-hidden bg-gradient-to-b ${theme.page} relative px-3 sm:px-4 py-4 sm:py-6`}>
+    <div className={`min-h-screen overflow-hidden bg-gradient-to-b ${theme.page} relative px-3 sm:px-4 pt-10 sm:pt-12 pb-20 sm:pb-24`}>
       <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white/50 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-amber-100/80 to-transparent" />
 
@@ -91,13 +91,13 @@ export default function StationsList() {
         <div className="mb-4 flex items-center gap-2 sm:gap-3">
         <motion.button
           onClick={() => navigate('/world')}
-          className="h-9 w-9 flex-shrink-0 rounded-full bg-white/90 shadow-lg flex items-center justify-center touch-target sm:h-10 sm:w-10"
+          className="h-10 w-10 flex-shrink-0 rounded-full bg-white/90 shadow-lg flex items-center justify-center sm:h-11 sm:w-11"
           whileTap={{ scale: 0.9 }}
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
         </motion.button>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-body uppercase tracking-[0.22em] text-foreground/65">Platform Select</p>
+            <p className="text-xs font-body uppercase tracking-[0.22em] text-foreground/65">Platform Select</p>
             <h1 className="truncate text-xl font-display text-foreground sm:text-2xl">{island.name}</h1>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function StationsList() {
         <section className="mb-5">
           <div className="mb-2 flex items-center justify-between gap-2 px-1">
             <h2 className="text-sm font-display text-foreground sm:text-base">Platform Board</h2>
-            <p className="text-[11px] font-body text-foreground/60">Tap any open stop</p>
+            <p className="text-xs font-body text-foreground/60">Tap any open stop</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {island.stations.map((station, index) => {
@@ -126,9 +126,9 @@ export default function StationsList() {
                         : 'border-white/50 bg-white/55 text-muted-foreground opacity-70'
                   }`}
                 >
-                  <span className="text-[10px] font-body uppercase tracking-[0.22em]">Platform {index + 1}</span>
+                  <span className="text-xs font-body uppercase tracking-[0.22em]">Platform {index + 1}</span>
                   <span className="mt-1 block truncate font-display text-sm">{station.name}</span>
-                  <span className="mt-2 inline-flex rounded-full bg-black/10 px-2 py-0.5 text-[10px] font-body">
+                  <span className="mt-2 inline-flex rounded-full bg-black/10 px-2 py-0.5 text-xs font-body">
                     {getStationState(index, station.id)}
                   </span>
                 </button>
@@ -172,11 +172,11 @@ export default function StationsList() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                              <p className="text-[11px] font-body uppercase tracking-[0.22em] text-foreground/55">Stop {index + 1}</p>
+                              <p className="text-xs font-body uppercase tracking-[0.22em] text-foreground/55">Stop {index + 1}</p>
                               <h3 className="truncate font-display text-lg text-foreground">{station.name}</h3>
                               <p className="mt-1 text-xs font-body text-foreground/65">{station.items.length} lesson items</p>
                             </div>
-                            <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-body uppercase tracking-[0.18em] ${isCompleted ? 'bg-emerald-500/12 text-emerald-700' : isCurrent ? theme.accentSoft : isUnlocked ? 'bg-slate-100 text-slate-700' : 'bg-slate-200/80 text-slate-500'}`}>
+                            <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-body uppercase tracking-[0.18em] ${isCompleted ? 'bg-emerald-500/12 text-emerald-700' : isCurrent ? theme.accentSoft : isUnlocked ? 'bg-slate-100 text-slate-700' : 'bg-slate-200/80 text-slate-500'}`}>
                               {getStationState(index, station.id)}
                             </span>
                           </div>

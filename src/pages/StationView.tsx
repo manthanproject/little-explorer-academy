@@ -44,12 +44,12 @@ export default function StationView() {
   const youtubeUrl = station.videoUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(`${station.name} ${subject} class ${currentClassLevel} kids`)}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary/20 via-background to-primary/10 px-4 sm:px-6 py-5 sm:py-7">
+    <div className="min-h-screen bg-gradient-to-b from-secondary/20 via-background to-primary/10 px-4 sm:px-6 pt-8 sm:pt-10 pb-20 sm:pb-24">
       {/* Back button */}
-      <div className="fixed top-4 sm:top-6 left-3 sm:left-4 z-20">
+      <div className="fixed top-safe left-3 sm:left-4 z-20 pt-2">
         <motion.button
           onClick={() => navigate('/stations')}
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-card shadow-lg flex items-center justify-center touch-target"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-card shadow-lg flex items-center justify-center"
           whileTap={{ scale: 0.9 }}
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />

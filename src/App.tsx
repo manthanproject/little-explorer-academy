@@ -14,12 +14,13 @@ import GameScreen from "./pages/GameScreen";
 import RewardScreen from "./pages/RewardScreen";
 import ProfileScreen from "./pages/ProfileScreen";
 import WelcomeScreen from "./pages/WelcomeScreen";
+import BiometricGate from "./pages/BiometricGate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { loading, isLoggedIn } = useGame();
+  const { loading, isLoggedIn, pendingBiometric } = useGame();
 
   if (loading) {
     return (
@@ -30,6 +31,11 @@ function AppRoutes() {
         </div>
       </div>
     );
+  }
+
+  // Session exists but biometric verification required
+  if (pendingBiometric && !isLoggedIn) {
+    return <BiometricGate />;
   }
 
   return (

@@ -240,7 +240,7 @@ export default function TrainJourney() {
 
       {phase === 'moving' && island && targetStation && (
         <motion.div
-          className="absolute inset-x-0 top-5 z-10 flex justify-center px-4"
+          className="absolute inset-x-0 top-safe z-10 flex justify-center px-4 pt-4"
           initial={{ opacity: 0, y: -18 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -251,10 +251,10 @@ export default function TrainJourney() {
               className="h-10 w-10 rounded-full object-cover ring-2 ring-white/70"
             />
             <div className="min-w-0">
-              <p className="text-[10px] font-body uppercase tracking-[0.24em] text-slate-700/70">Now Traveling</p>
+              <p className="text-xs font-body uppercase tracking-[0.24em] text-slate-700/70">Now Traveling</p>
               <p className="truncate font-display text-sm sm:text-base">{island.name} • {targetStation.name}</p>
             </div>
-            <span className="rounded-full bg-white/80 px-2 py-1 text-[10px] font-body uppercase tracking-[0.14em] text-slate-700">Arriving Soon</span>
+            <span className="rounded-full bg-white/80 px-2 py-1 text-xs font-body uppercase tracking-[0.14em] text-slate-700">Arriving Soon</span>
           </div>
         </motion.div>
       )}
@@ -267,7 +267,7 @@ export default function TrainJourney() {
           transition={{ type: 'spring', damping: 14 }}
         >
           <div className="w-full max-w-md rounded-[2rem] border border-slate-200 bg-slate-50 p-6 text-center text-slate-900 shadow-[0_24px_50px_rgba(0,0,0,0.2)] sm:p-8">
-            <div className="mx-auto inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-[10px] font-body uppercase tracking-[0.2em] text-white">
+            <div className="mx-auto inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-body uppercase tracking-[0.2em] text-white">
               Station Arrival
             </div>
             <img
@@ -275,7 +275,7 @@ export default function TrainJourney() {
               alt={island.name}
               className="mx-auto mt-3 h-20 w-20 object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.35)]"
             />
-            <p className="mt-4 text-[11px] font-body uppercase tracking-[0.28em] text-slate-600">Arriving At</p>
+            <p className="mt-4 text-xs font-body uppercase tracking-[0.28em] text-slate-600">Arriving At</p>
             <h1 className="mt-2 font-display text-3xl text-slate-900 sm:text-4xl">{targetStation.name}</h1>
             <p className="mt-2 text-sm font-body text-slate-700 sm:text-base">Welcome to {island.name}. Your next learning stop is ready.</p>
             <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-gradient-to-r from-sky-300 via-cyan-300 to-emerald-300" />

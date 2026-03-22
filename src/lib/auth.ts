@@ -101,31 +101,44 @@ function getBiometricCredentials(): { email: string; password: string } | null {
   }
 }
 
+// Store last used password temporarily in memory for biometric setup
+let lastUsedPassword: string | null = null;
+
+export function setLastPassword(pw: string) {
+  lastUsedPassword = pw;
+}
+
+export function getLastPassword(): string | null {
+  return lastUsedPassword;
+}
+
 export async function registerBiometric(user: AuthUser, password: string): Promise<RegisterResult> {
   if (!hasBiometricSupport()) {
     return { ok: false, error: 'Face/Fingerprint login is not supported on this device.' };
   }
 
-  // Native Android/iOS — use device biometric directly
+  // Save credentials locally first (fast, no network)
+  const credentialId = isNativePlatform() ? `native_${user.id}` : null;
+
+  // Native Android/iOS — verify biometric (no timeout, let system handle)
   if (isNativePlatform()) {
-    const verified = await authenticateNative('Set up biometric login for Little Explorer Academy');
+    const verified = await authenticateNative('Set up biometric login');
+
     if (!verified) {
-      return { ok: false, error: 'Biometric setup was cancelled or failed.' };
+      return { ok: false, error: 'Biometric setup was cancelled. Make sure fingerprint/face is set up in your phone Settings.' };
     }
 
-    const credentialId = `native_${user.id}`;
+    // Save locally immediately
+    saveBiometricCredentials(user.email, password);
 
-    const { error } = await supabase
+    // Update Supabase in background (don't block UI)
+    supabase
       .from('student_profiles')
       .update({ biometric_credential_id: credentialId })
-      .eq('id', user.id);
+      .eq('id', user.id)
+      .then(() => {});
 
-    if (error) {
-      return { ok: false, error: 'Failed to save biometric data.' };
-    }
-
-    saveBiometricCredentials(user.email, password);
-    return { ok: true, user: { ...user, biometricCredentialId: credentialId } };
+    return { ok: true, user: { ...user, biometricCredentialId: credentialId! } };
   }
 
   // Web — use WebAuthn
@@ -156,23 +169,19 @@ export async function registerBiometric(user: AuthUser, password: string): Promi
       return { ok: false, error: 'Biometric registration failed.' };
     }
 
-    const credentialId = toBase64Url(new Uint8Array(credential.rawId));
+    const webCredentialId = toBase64Url(new Uint8Array(credential.rawId));
 
-    // Save credential ID to Supabase
-    const { error } = await supabase
-      .from('student_profiles')
-      .update({ biometric_credential_id: credentialId })
-      .eq('id', user.id);
-
-    if (error) {
-      return { ok: false, error: 'Failed to save biometric data.' };
-    }
-
-    // Save credentials locally for biometric re-auth
+    // Save locally immediately
     saveBiometricCredentials(user.email, password);
 
-    const updatedUser = { ...user, biometricCredentialId: credentialId };
-    return { ok: true, user: updatedUser };
+    // Update Supabase in background
+    supabase
+      .from('student_profiles')
+      .update({ biometric_credential_id: webCredentialId })
+      .eq('id', user.id)
+      .then(() => {});
+
+    return { ok: true, user: { ...user, biometricCredentialId: webCredentialId } };
   } catch {
     return { ok: false, error: 'Biometric setup was cancelled or failed.' };
   }
@@ -209,10 +218,10 @@ export async function loginWithBiometric(email?: string): Promise<RegisterResult
   }
 
   if (!profile) {
-    return { ok: false, error: 'No biometric account found on this device. Please login with password first.' };
+    return { ok: false, error: 'No biometric account found. If you reinstalled the app, please login with email & password once to restore biometric.' };
   }
   if (!profile.biometric_credential_id) {
-    return { ok: false, error: 'Biometric login is not enabled for this account yet.' };
+    return { ok: false, error: 'Biometric login is not enabled for this account. Please login with password and set up biometric from the Welcome screen.' };
   }
 
   // Native Android/iOS — use device biometric (face/fingerprint)
@@ -296,20 +305,7 @@ export async function registerUser(input: RegisterInput): Promise<RegisterResult
     return { ok: false, error: 'Password must be at least 6 characters.' };
   }
 
-  // Check duplicate roll number
-  const { data: existing } = await supabase
-    .from('student_profiles')
-    .select('id')
-    .eq('class', className)
-    .eq('division', division)
-    .eq('roll_no', input.rollNo)
-    .maybeSingle();
-
-  if (existing) {
-    return { ok: false, error: 'This class/division/roll number already exists.' };
-  }
-
-  // Sign up with Supabase Auth
+  // Sign up with Supabase Auth (skip duplicate check — DB constraint handles it)
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password: input.password,
@@ -325,30 +321,33 @@ export async function registerUser(input: RegisterInput): Promise<RegisterResult
   const userId = authData.user.id;
   const avatar = input.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)];
 
-  // Insert student profile
-  const { error: profileError } = await supabase.from('student_profiles').insert({
-    id: userId,
-    name: input.name.trim(),
-    class: className,
-    division,
-    roll_no: input.rollNo,
-    avatar,
-    email,
-  });
+  // Insert profile + game progress in parallel for speed
+  const [profileResult, _progressResult] = await Promise.all([
+    supabase.from('student_profiles').insert({
+      id: userId,
+      name: input.name.trim(),
+      class: className,
+      division,
+      roll_no: input.rollNo,
+      avatar,
+      email,
+    }),
+    supabase.from('game_progress').insert({
+      user_id: userId,
+      completed_stations: [],
+      stars: 0,
+      current_island: null,
+      current_station: 0,
+      earned_rewards: [],
+    }),
+  ]);
 
-  if (profileError) {
-    return { ok: false, error: profileError.message };
+  if (profileResult.error) {
+    if (profileResult.error.message?.includes('unique') || profileResult.error.message?.includes('duplicate')) {
+      return { ok: false, error: 'This class/division/roll number already exists.' };
+    }
+    return { ok: false, error: profileResult.error.message };
   }
-
-  // Insert initial game progress
-  await supabase.from('game_progress').insert({
-    user_id: userId,
-    completed_stations: [],
-    stars: 0,
-    current_island: null,
-    current_station: 0,
-    earned_rewards: [],
-  });
 
   const user: AuthUser = {
     id: userId,

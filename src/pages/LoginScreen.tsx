@@ -9,9 +9,9 @@ import {
   hasBiometricSupport,
   loginWithBiometric,
   loginWithPassword,
-  registerBiometric,
   registerUser,
   saveBiometricCredentials,
+  setLastPassword,
   toStudentProfile,
 } from '@/lib/auth';
 
@@ -63,6 +63,7 @@ export default function LoginScreen() {
       saveBiometricCredentials(result.user.email, password);
     }
 
+    setLastPassword(password);
     login(toStudentProfile(result.user));
     navigate('/welcome');
   };
@@ -93,21 +94,9 @@ export default function LoginScreen() {
       return;
     }
 
-    let finalUser = result.user;
-    if (biometricSupported) {
-      const biometric = await registerBiometric(result.user, regPassword);
-      if (biometric.ok && biometric.user) {
-        finalUser = biometric.user;
-        setSuccess('Registration successful. Face/Fingerprint login enabled.');
-      } else {
-        setSuccess('Registration successful. You can enable Face/Fingerprint later.');
-      }
-    } else {
-      setSuccess('Registration successful.');
-    }
-
     setBusy(false);
-    login(toStudentProfile(finalUser));
+    setLastPassword(regPassword);
+    login(toStudentProfile(result.user));
     navigate('/welcome');
   };
 
@@ -251,7 +240,7 @@ export default function LoginScreen() {
                 {busy ? 'Setting up...' : 'Create Account'}
               </button>
 
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Duplicate account protection is enabled for Email and Class + Division + Roll No.
               </p>
             </form>

@@ -28,7 +28,7 @@ export default function BiometricAnimation({ onComplete, type }: BiometricAnimat
   const scanningRingColor = type === 'face' ? 'border-teal-400' : 'border-emerald-500';
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-b from-secondary/20 via-background to-primary/10 flex flex-col items-center justify-center px-4">
+    <div className="fixed inset-0 z-50 bg-gradient-to-b from-secondary/20 via-background to-primary/10 flex flex-col items-center justify-center px-4 pt-safe pb-safe">
       <GuideCharacter message={message} size="sm" />
 
       <motion.div

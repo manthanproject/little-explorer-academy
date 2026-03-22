@@ -1,16 +1,5 @@
 import { Capacitor } from '@capacitor/core';
 
-// Dynamically import the biometric plugin only on native
-let BiometricAuth: any = null;
-
-async function getBiometricAuth() {
-  if (!BiometricAuth && isNativePlatform()) {
-    const mod = await import('@aparajita/capacitor-biometric-auth');
-    BiometricAuth = mod.BiometricAuth;
-  }
-  return BiometricAuth;
-}
-
 export function isNativePlatform(): boolean {
   return Capacitor.isNativePlatform();
 }
@@ -19,17 +8,12 @@ export async function checkNativeBiometricSupport(): Promise<{ face: boolean; fi
   if (!isNativePlatform()) return { face: false, fingerprint: false };
 
   try {
-    const auth = await getBiometricAuth();
-    if (!auth) return { face: false, fingerprint: false };
-
-    const result = await auth.checkBiometry();
-    const available = result.isAvailable;
-    // biometryType: 1 = touchId/fingerprint, 2 = faceId/face, 3 = irisId
-    const biometryType = result.biometryType;
+    const { NativeBiometric } = await import('capacitor-native-biometric');
+    const result = await NativeBiometric.isAvailable();
 
     return {
-      face: available && (biometryType === 2 || biometryType === 3),
-      fingerprint: available && biometryType === 1,
+      face: result.isAvailable && result.biometryType === 2,
+      fingerprint: result.isAvailable && (result.biometryType === 1 || result.biometryType === 3),
     };
   } catch {
     return { face: false, fingerprint: false };
@@ -40,21 +24,28 @@ export async function authenticateNative(reason: string): Promise<boolean> {
   if (!isNativePlatform()) return false;
 
   try {
-    const auth = await getBiometricAuth();
-    if (!auth) return false;
+    const { NativeBiometric } = await import('capacitor-native-biometric');
 
-    await auth.authenticate({
+    // First check if biometric is available
+    const availability = await NativeBiometric.isAvailable();
+    if (!availability.isAvailable) {
+      console.warn('[Biometric] Not available on this device');
+      return false;
+    }
+
+    // Show the biometric prompt — NO timeout, let Android handle it
+    await NativeBiometric.verifyIdentity({
       reason,
-      cancelTitle: 'Cancel',
-      allowDeviceCredential: true,
-      iosFallbackTitle: 'Use Password',
-      androidTitle: 'Little Explorer Academy',
-      androidSubtitle: 'Verify your identity',
-      androidConfirmationRequired: false,
+      title: 'Little Explorer Academy',
+      subtitle: 'Verify your identity',
+      description: reason,
+      useFallback: true,
+      maxAttempts: 5,
     });
 
     return true;
-  } catch {
+  } catch (err) {
+    console.warn('[Biometric] Auth failed:', err);
     return false;
   }
 }
